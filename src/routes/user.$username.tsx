@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getSeller } from "@/data/users";
-import { getItemsBySeller } from "@/data/items";
+import { getItemsBySeller, type Item } from "@/data/items";
 import { getReviewsForSeller } from "@/data/reviews";
+import type { Review } from "@/data/reviews";
 import { ItemCard } from "@/components/ItemCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BadgeCheck, Star } from "lucide-react";
