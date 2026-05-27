@@ -57,7 +57,7 @@ function Profile() {
               <Stat label="Member" value={seller.joinDate} />
             </div>
             <div className="flex flex-wrap gap-2 mt-6">
-              {seller.badges.map((b) => (
+              {seller.badges.map((b: string) => (
                 <span key={b} className="text-xs font-medium px-3 py-1 bg-brand-red/10 ring-1 ring-brand-red/20 text-brand-red rounded-full">
                   {b}
                 </span>
