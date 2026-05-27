@@ -80,7 +80,7 @@ function Profile() {
             <Empty text="No active listings." />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {listings.map((item) => <ItemCard key={item.id} item={item} />)}
+              {listings.map((item: Item) => <ItemCard key={item.id} item={item} />)}
             </div>
           )}
         </TabsContent>
@@ -104,7 +104,7 @@ function Profile() {
             <Empty text="No reviews yet." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reviews.map((r) => (
+              {reviews.map((r: Review) => (
                 <div key={r.id} className="bg-surface ring-1 ring-white/5 rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-medium text-sm">{r.reviewerUsername}</span>
