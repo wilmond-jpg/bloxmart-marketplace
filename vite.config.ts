@@ -15,8 +15,9 @@ export default defineConfig({
   nitro: {
     preset: "vercel",
     output: {
-      publicDir: "dist/static",
-      serverDir: "dist/functions/__server.func",
+      dir: ".vercel/output",
+      publicDir: ".vercel/output/static",
+      serverDir: ".vercel/output/functions/__server.func",
     },
   },
 });
