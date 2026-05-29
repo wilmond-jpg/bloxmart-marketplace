@@ -14,9 +14,17 @@ import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UserUsernameRouteImport } from './routes/user.$username'
+import { Route as SellerApplyRouteImport } from './routes/seller/apply'
 import { Route as ItemIdRouteImport } from './routes/item.$id'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminSellerApplicationsRouteImport } from './routes/admin/seller-applications'
+import { Route as AdminModerationRouteImport } from './routes/admin/moderation'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -43,6 +51,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -53,84 +66,175 @@ const UserUsernameRoute = UserUsernameRouteImport.update({
   path: '/user/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellerApplyRoute = SellerApplyRouteImport.update({
+  id: '/seller/apply',
+  path: '/seller/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItemIdRoute = ItemIdRouteImport.update({
   id: '/item/$id',
   path: '/item/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSellerApplicationsRoute = AdminSellerApplicationsRouteImport.update({
+  id: '/admin/seller-applications',
+  path: '/admin/seller-applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminModerationRoute = AdminModerationRouteImport.update({
+  id: '/admin/moderation',
+  path: '/admin/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
   '/signup': typeof SignupRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/seller-applications': typeof AdminSellerApplicationsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/item/$id': typeof ItemIdRoute
+  '/seller/apply': typeof SellerApplyRoute
   '/user/$username': typeof UserUsernameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
   '/signup': typeof SignupRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/seller-applications': typeof AdminSellerApplicationsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/item/$id': typeof ItemIdRoute
+  '/seller/apply': typeof SellerApplyRoute
   '/user/$username': typeof UserUsernameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
   '/signup': typeof SignupRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/seller-applications': typeof AdminSellerApplicationsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/item/$id': typeof ItemIdRoute
+  '/seller/apply': typeof SellerApplyRoute
   '/user/$username': typeof UserUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/login'
     | '/marketplace'
     | '/messages'
     | '/payments'
     | '/signup'
+    | '/admin/dashboard'
+    | '/admin/moderation'
+    | '/admin/seller-applications'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/auth/callback'
     | '/item/$id'
+    | '/seller/apply'
     | '/user/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/login'
     | '/marketplace'
     | '/messages'
     | '/payments'
     | '/signup'
+    | '/admin/dashboard'
+    | '/admin/moderation'
+    | '/admin/seller-applications'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/auth/callback'
     | '/item/$id'
+    | '/seller/apply'
     | '/user/$username'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/login'
     | '/marketplace'
     | '/messages'
     | '/payments'
     | '/signup'
+    | '/admin/dashboard'
+    | '/admin/moderation'
+    | '/admin/seller-applications'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/auth/callback'
     | '/item/$id'
+    | '/seller/apply'
     | '/user/$username'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   MarketplaceRoute: typeof MarketplaceRoute
   MessagesRoute: typeof MessagesRoute
   PaymentsRoute: typeof PaymentsRoute
   SignupRoute: typeof SignupRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminModerationRoute: typeof AdminModerationRoute
+  AdminSellerApplicationsRoute: typeof AdminSellerApplicationsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ItemIdRoute: typeof ItemIdRoute
+  SellerApplyRoute: typeof SellerApplyRoute
   UserUsernameRoute: typeof UserUsernameRoute
 }
 
@@ -171,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -185,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/apply': {
+      id: '/seller/apply'
+      path: '/seller/apply'
+      fullPath: '/seller/apply'
+      preLoaderRoute: typeof SellerApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/item/$id': {
       id: '/item/$id'
       path: '/item/$id'
@@ -192,17 +310,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/seller-applications': {
+      id: '/admin/seller-applications'
+      path: '/admin/seller-applications'
+      fullPath: '/admin/seller-applications'
+      preLoaderRoute: typeof AdminSellerApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/moderation': {
+      id: '/admin/moderation'
+      path: '/admin/moderation'
+      fullPath: '/admin/moderation'
+      preLoaderRoute: typeof AdminModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   MarketplaceRoute: MarketplaceRoute,
   MessagesRoute: MessagesRoute,
   PaymentsRoute: PaymentsRoute,
   SignupRoute: SignupRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminModerationRoute: AdminModerationRoute,
+  AdminSellerApplicationsRoute: AdminSellerApplicationsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ItemIdRoute: ItemIdRoute,
+  SellerApplyRoute: SellerApplyRoute,
   UserUsernameRoute: UserUsernameRoute,
 }
 export const routeTree = rootRouteImport
