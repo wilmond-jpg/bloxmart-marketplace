@@ -12,5 +12,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  nitro: { preset: "vercel" },
+  nitro: {
+    preset: "vercel",
+    output: {
+      publicDir: "dist/static",
+      serverDir: "dist/functions/__server.func",
+    },
+  },
 });
