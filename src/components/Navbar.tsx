@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MessageCircle, LogOut, User as UserIcon, ExternalLink, Menu } from "lucide-react";
+import { Search, MessageCircle, LogOut, User as UserIcon, ExternalLink, Menu, LayoutDashboard, Shield } from "lucide-react";
 import { useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Navbar() {
   const { currency, setCurrency } = useCurrency();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
@@ -121,6 +121,22 @@ export function Navbar() {
                       Messages
                     </Link>
                   </DropdownMenuItem>
+                  {!isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="cursor-pointer">
+                        <LayoutDashboard className="size-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/dashboard" className="cursor-pointer">
+                        <Shield className="size-4 mr-2" />
+                        Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="cursor-pointer text-brand-red focus:text-brand-red">
                     <LogOut className="size-4 mr-2" />

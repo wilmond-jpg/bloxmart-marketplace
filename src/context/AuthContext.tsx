@@ -33,31 +33,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const authUser = session.user;
 
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("id, username, display_name, avatar_url, bio, account_status, created_at")
-        .eq("id", authUser.id)
-        .single();
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-      const { data: roleRows } = await supabase
-        .from("user_roles_current")
-        .select("role_key, label")
-        .eq("user_id", authUser.id);
+        const profileRes = await fetch(
+          `${supabaseUrl}/rest/v1/user_profiles?id=eq.${authUser.id}&select=id,username,display_name,avatar_url,bio,account_status,created_at`,
+          {
+            headers: {
+              apikey: supabaseAnonKey,
+              Authorization: `Bearer ${session.access_token}`,
+              Accept: "application/json",
+            },
+          },
+        );
+        const profileRows = await profileRes.json();
+        const profile = profileRows?.[0] ?? null;
 
-      const roleKeys = roleRows?.map((r) => r.role_key) ?? [];
+        const rolesRes = await fetch(
+          `${supabaseUrl}/rest/v1/user_roles_current?user_id=eq.${authUser.id}&select=role_key,label`,
+          {
+            headers: {
+              apikey: supabaseAnonKey,
+              Authorization: `Bearer ${session.access_token}`,
+              Accept: "application/json",
+            },
+          },
+        );
+        const roleRows = await rolesRes.json();
 
-      setUser({
-        id: authUser.id,
-        username: profile?.username ?? authUser.email?.split("@")[0] ?? "user",
-        email: authUser.email,
-        display_name: profile?.display_name ?? null,
-        avatar_url: profile?.avatar_url ?? null,
-        bio: profile?.bio ?? null,
-        account_status: profile?.account_status ?? "active",
-        created_at: profile?.created_at ?? null,
-        roles: roleKeys,
-      });
-      setIsLoading(false);
+        const roleKeys = roleRows?.map((r) => r.role_key) ?? [];
+
+        setUser({
+          id: authUser.id,
+          username: profile?.username ?? authUser.email?.split("@")[0] ?? "user",
+          email: authUser.email,
+          display_name: profile?.display_name ?? null,
+          avatar_url: profile?.avatar_url ?? null,
+          bio: profile?.bio ?? null,
+          account_status: profile?.account_status ?? "active",
+          created_at: profile?.created_at ?? null,
+          roles: roleKeys,
+        });
+      } catch (err) {
+        console.error("fetchProfile error:", err);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [supabase]
   );
