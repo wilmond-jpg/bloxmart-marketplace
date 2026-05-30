@@ -1,49 +1,121 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-
-export type FakeUser = { username: string; email: string };
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createClient } from "@/lib/supabase/browserClient";
+import type { AuthUser } from "@/lib/supabase/types";
+import type { Session } from "@supabase/supabase-js";
 
 type Ctx = {
-  user: FakeUser | null;
+  user: AuthUser | null;
   isLoggedIn: boolean;
-  login: (email: string) => void;
-  signup: (username: string, email: string) => void;
-  logout: () => void;
+  isLoading: boolean;
+  isAdmin: boolean;
+  isModerator: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (username: string, email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<Ctx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<FakeUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
+
+  const fetchProfile = useCallback(
+    async (session: Session | null) => {
+      if (!session?.user) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const authUser = session.user;
+
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("id, username, display_name, avatar_url, bio, account_status, created_at")
+        .eq("id", authUser.id)
+        .single();
+
+      const { data: roleRows } = await supabase
+        .from("user_roles_current")
+        .select("role_key, label")
+        .eq("user_id", authUser.id);
+
+      const roleKeys = roleRows?.map((r) => r.role_key) ?? [];
+
+      setUser({
+        id: authUser.id,
+        username: profile?.username ?? authUser.email?.split("@")[0] ?? "user",
+        email: authUser.email,
+        display_name: profile?.display_name ?? null,
+        avatar_url: profile?.avatar_url ?? null,
+        bio: profile?.bio ?? null,
+        account_status: profile?.account_status ?? "active",
+        roles: roleKeys,
+      });
+      setIsLoading(false);
+    },
+    [supabase]
+  );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = localStorage.getItem("bloxmart-user");
-    if (raw) {
-      try {
-        setUser(JSON.parse(raw));
-      } catch {
-        /* ignore */
-      }
-    }
-  }, []);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      fetchProfile(session);
+    });
 
-  const persist = (u: FakeUser | null) => {
-    setUser(u);
-    if (typeof window !== "undefined") {
-      if (u) localStorage.setItem("bloxmart-user", JSON.stringify(u));
-      else localStorage.removeItem("bloxmart-user");
-    }
-  };
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      fetchProfile(session);
+    });
 
-  const login = (email: string) => {
-    const username = email.split("@")[0] || "player";
-    persist({ username, email });
-  };
-  const signup = (username: string, email: string) => persist({ username, email });
-  const logout = () => persist(null);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetchProfile, supabase]);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
+  const signup = useCallback(
+    async (username: string, email: string, password: string) => {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } },
+      });
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) throw error;
+  }, [supabase]);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  }, [supabase]);
+
+  const isAdmin = user?.roles.includes("admin") ?? false;
+  const isModerator = user?.roles.includes("moderator") ?? false;
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoggedIn: !!user, isLoading, isAdmin, isModerator, login, signup, signInWithGoogle, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
