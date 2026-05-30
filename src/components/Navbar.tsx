@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MessageCircle, LogOut, User as UserIcon, Menu } from "lucide-react";
+import { Search, MessageCircle, LogOut, User as UserIcon, ExternalLink, Menu } from "lucide-react";
 import { useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,17 +91,28 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 rounded-full bg-surface ring-1 ring-zinc-800 pl-1 pr-3 py-1 hover:ring-zinc-700 transition">
-                    <div className="size-7 rounded-full bg-brand-red grid place-items-center text-xs font-bold text-white">
-                      {user?.username.slice(0, 1).toUpperCase()}
-                    </div>
+                    <Avatar className="size-7 ring-1 ring-zinc-800">
+                      {user?.avatar_url ? (
+                        <AvatarImage src={user.avatar_url} alt={user.username} />
+                      ) : null}
+                      <AvatarFallback className="bg-brand-red text-[10px] font-bold text-white">
+                        {user?.username.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <span className="text-xs font-medium hidden sm:inline">{user?.username}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/user/$username" params={{ username: user!.username }} className="cursor-pointer">
+                    <Link to="/profile" className="cursor-pointer">
                       <UserIcon className="size-4 mr-2" />
-                      My Profile
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/user/$username" params={{ username: user!.username }} className="cursor-pointer">
+                      <ExternalLink className="size-4 mr-2" />
+                      View Public Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
@@ -29,6 +30,11 @@ import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentsRoute = PaymentsRouteImport.update({
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/payments'
+    | '/profile'
     | '/signup'
     | '/admin/dashboard'
     | '/admin/moderation'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/payments'
+    | '/profile'
     | '/signup'
     | '/admin/dashboard'
     | '/admin/moderation'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/messages'
     | '/payments'
+    | '/profile'
     | '/signup'
     | '/admin/dashboard'
     | '/admin/moderation'
@@ -226,6 +238,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRoute
   MessagesRoute: typeof MessagesRoute
   PaymentsRoute: typeof PaymentsRoute
+  ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminModerationRoute: typeof AdminModerationRoute
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payments': {
@@ -362,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRoute,
   MessagesRoute: MessagesRoute,
   PaymentsRoute: PaymentsRoute,
+  ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminModerationRoute: AdminModerationRoute,

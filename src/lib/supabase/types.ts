@@ -21,6 +21,7 @@ export type AuthUser = {
   avatar_url: string | null;
   bio: string | null;
   account_status: string;
+  created_at: string | null;
   roles: string[];
 };
 

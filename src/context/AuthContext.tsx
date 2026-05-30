@@ -13,6 +13,7 @@ type Ctx = {
   signup: (username: string, email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<Ctx | null>(null);
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatar_url: profile?.avatar_url ?? null,
         bio: profile?.bio ?? null,
         account_status: profile?.account_status ?? "active",
+        created_at: profile?.created_at ?? null,
         roles: roleKeys,
       });
       setIsLoading(false);
@@ -109,12 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, [supabase]);
 
+  const refreshProfile = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    await fetchProfile(session);
+  }, [fetchProfile, supabase]);
+
   const isAdmin = user?.roles.includes("admin") ?? false;
   const isModerator = user?.roles.includes("moderator") ?? false;
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoggedIn: !!user, isLoading, isAdmin, isModerator, login, signup, signInWithGoogle, logout }}
+      value={{ user, isLoggedIn: !!user, isLoading, isAdmin, isModerator, login, signup, signInWithGoogle, logout, refreshProfile }}
     >
       {children}
     </AuthContext.Provider>
