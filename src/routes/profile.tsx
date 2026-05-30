@@ -31,6 +31,7 @@ export const Route = createFileRoute("/profile")({
 function Profile() {
   const { user, refreshProfile } = useAuth();
   const supabase = createClient();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [editing, setEditing] = useState(false);
@@ -118,6 +119,8 @@ function Profile() {
         year: "numeric",
       })
     : null;
+
+  if (!user) return null;
 
   return (
     <AuthGuard>
