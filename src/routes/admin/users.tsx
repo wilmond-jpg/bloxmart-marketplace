@@ -41,7 +41,7 @@ export const Route = createFileRoute("/admin/users")({
 });
 
 function AdminUsers() {
-  const { isAdmin, isLoading: isAuthLoading } = useAuth();
+  const { user: currentUser, isAdmin, isLoading: isAuthLoading } = useAuth();
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -161,30 +161,32 @@ function AdminUsers() {
             className="w-full bg-surface ring-1 ring-zinc-800 text-sm rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-brand-red/50"
           />
         </div>
-        <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-full sm:w-44 bg-surface ring-1 ring-zinc-800 text-sm">
-            <SelectValue placeholder="All roles" />
-          </SelectTrigger>
-          <SelectContent className="bg-surface border-zinc-800">
-            <SelectItem value="all">All roles</SelectItem>
-            <SelectItem value="buyer">Buyer</SelectItem>
-            <SelectItem value="seller">Seller</SelectItem>
-            <SelectItem value="verified_trader">Verified Trader</SelectItem>
-            <SelectItem value="moderator">Moderator</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-full sm:w-44 bg-surface ring-1 ring-zinc-800 text-sm">
-            <SelectValue placeholder="All statuses" />
-          </SelectTrigger>
-          <SelectContent className="bg-surface border-zinc-800">
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
-            <SelectItem value="banned">Banned</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3">
+          <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-44 bg-surface ring-1 ring-zinc-800 text-sm">
+              <SelectValue placeholder="All roles" />
+            </SelectTrigger>
+            <SelectContent className="bg-surface border-zinc-800">
+              <SelectItem value="all">All roles</SelectItem>
+              <SelectItem value="buyer">Buyer</SelectItem>
+              <SelectItem value="seller">Seller</SelectItem>
+              <SelectItem value="verified_trader">Verified Trader</SelectItem>
+              <SelectItem value="moderator">Moderator</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-44 bg-surface ring-1 ring-zinc-800 text-sm">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent className="bg-surface border-zinc-800">
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="banned">Banned</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="bg-surface rounded-2xl ring-1 ring-white/5 overflow-hidden">
@@ -207,54 +209,37 @@ function AdminUsers() {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="border-zinc-800">
-                <TableHead className="w-12">Avatar</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pageUsers.map((user) => (
-                <TableRow key={user.id} className="border-zinc-800">
-                  <TableCell>
-                    <Avatar className="size-8 ring-1 ring-zinc-800">
-                      <AvatarFallback className="bg-brand-red text-xs font-bold text-white">
+          <>
+            {/* Mobile card layout */}
+            <div className="divide-y divide-zinc-800 md:hidden">
+              {pageUsers.map((user) => {
+                const isSelf = currentUser?.id === user.id;
+                return (
+                <div key={user.id} className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-10 ring-1 ring-zinc-800 shrink-0">
+                      <AvatarFallback className="bg-brand-red text-sm font-bold text-white">
                         {user.username.slice(0, 1).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                  </TableCell>
-                  <TableCell className="font-medium">{user.username}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.roles.map((role) => (
-                        <Badge key={role} variant="secondary" className="text-[10px] capitalize">
-                          {role.replace("_", " ")}
-                        </Badge>
-                      ))}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate flex items-center gap-2">
+                        {user.username}
+                        {isSelf && <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-400">You</Badge>}
+                      </p>
+                      <span className={`text-xs font-medium ${getStatusColor(user.account_status)}`}>
+                        {user.account_status}
+                      </span>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`text-xs font-medium ${getStatusColor(user.account_status)}`}>
-                      {user.account_status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-zinc-400 text-sm">
-                    {user.created_at ? formatDate(user.created_at) : <span className="text-zinc-600">—</span>}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center gap-1 shrink-0">
                       {user.roles.includes("seller") ? (
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-zinc-400 hover:text-red-400"
+                          className="size-8 text-zinc-400 hover:text-red-400 disabled:opacity-20 disabled:pointer-events-none"
                           onClick={() => handleRevokeRole(user.id, "seller")}
                           title="Revoke seller role"
+                          disabled={isSelf}
                         >
                           <ShieldOff className="size-4" />
                         </Button>
@@ -262,9 +247,10 @@ function AdminUsers() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-zinc-400 hover:text-green-400"
+                          className="size-8 text-zinc-400 hover:text-green-400 disabled:opacity-20 disabled:pointer-events-none"
                           onClick={() => handleGrantRole(user.id, "seller")}
                           title="Grant seller role"
+                          disabled={isSelf}
                         >
                           <Shield className="size-4" />
                         </Button>
@@ -273,9 +259,10 @@ function AdminUsers() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-zinc-400 hover:text-yellow-400"
+                          className="size-8 text-zinc-400 hover:text-yellow-400 disabled:opacity-20 disabled:pointer-events-none"
                           onClick={() => handleToggleStatus(user.id, user.account_status)}
                           title="Suspend user"
+                          disabled={isSelf}
                         >
                           <Ban className="size-4" />
                         </Button>
@@ -283,19 +270,132 @@ function AdminUsers() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 text-zinc-400 hover:text-green-400"
+                          className="size-8 text-zinc-400 hover:text-green-400 disabled:opacity-20 disabled:pointer-events-none"
                           onClick={() => handleToggleStatus(user.id, user.account_status)}
                           title="Reactivate user"
+                          disabled={isSelf}
                         >
                           <CheckCircle className="size-4" />
                         </Button>
                       )}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {user.roles.map((role) => (
+                      <Badge key={role} variant="secondary" className="text-[10px] capitalize">
+                        {role.replace("_", " ")}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                );
+              })}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-zinc-800">
+                    <TableHead className="w-12">Avatar</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Roles</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden lg:table-cell">Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pageUsers.map((user) => {
+                    const isSelf = currentUser?.id === user.id;
+                    return (
+                    <TableRow key={user.id} className="border-zinc-800">
+                      <TableCell>
+                        <Avatar className="size-8 ring-1 ring-zinc-800">
+                          <AvatarFallback className="bg-brand-red text-xs font-bold text-white">
+                            {user.username.slice(0, 1).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <span className="flex items-center gap-2">
+                          {user.username}
+                          {isSelf && <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-400">You</Badge>}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.map((role) => (
+                            <Badge key={role} variant="secondary" className="text-[10px] capitalize">
+                              {role.replace("_", " ")}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-medium ${getStatusColor(user.account_status)}`}>
+                          {user.account_status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-zinc-400 text-sm">
+                        {user.created_at ? formatDate(user.created_at) : <span className="text-zinc-600">—</span>}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {user.roles.includes("seller") ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-zinc-400 hover:text-red-400 disabled:opacity-20 disabled:pointer-events-none"
+                              onClick={() => handleRevokeRole(user.id, "seller")}
+                              title="Revoke seller role"
+                              disabled={isSelf}
+                            >
+                              <ShieldOff className="size-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-zinc-400 hover:text-green-400 disabled:opacity-20 disabled:pointer-events-none"
+                              onClick={() => handleGrantRole(user.id, "seller")}
+                              title="Grant seller role"
+                              disabled={isSelf}
+                            >
+                              <Shield className="size-4" />
+                            </Button>
+                          )}
+                          {user.account_status === "active" ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-zinc-400 hover:text-yellow-400 disabled:opacity-20 disabled:pointer-events-none"
+                              onClick={() => handleToggleStatus(user.id, user.account_status)}
+                              title="Suspend user"
+                              disabled={isSelf}
+                            >
+                              <Ban className="size-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-zinc-400 hover:text-green-400 disabled:opacity-20 disabled:pointer-events-none"
+                              onClick={() => handleToggleStatus(user.id, user.account_status)}
+                              title="Reactivate user"
+                              disabled={isSelf}
+                            >
+                              <CheckCircle className="size-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 
