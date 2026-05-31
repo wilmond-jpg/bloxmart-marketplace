@@ -453,6 +453,24 @@ This sequence avoids breaking auth and lets you verify each layer incrementally.
 
 ---
 
+## 13.5) Admin & Marketplace Database Tables (completed)
+
+Created `supabase/migrations/002_admin_tables.sql` with 7 tables:
+
+| Table | Purpose |
+|---|---|
+| `public.listings` | Item listings with seller FK, type enum, price/rap, status |
+| `public.trades` | Trade lifecycle with buyer/seller/listing FKs |
+| `public.reviews` | Post-trade ratings linked to trades |
+| `public.flags` | Reported content (targets listing OR user) |
+| `public.disputes` | Trade dispute resolution flow |
+| `public.notifications` | Per-user notification queue |
+| `public.platform_settings` | Key/value config with defaults |
+
+Includes: RLS policies, updated_at triggers, indexes, helper function `set_updated_at()`.
+
+---
+
 ## 14) UI/UX conventions to follow during implementation
 
 - Use Sonner (`toast.success`, `toast.error`, etc.)—the app already mounts `Toaster` in `[src/routes/__root.tsx](src/routes/__root.tsx)`.
@@ -484,3 +502,186 @@ These are not blocking for the plan, but they must be chosen before coding:
 5. RLS policies ensure users only access permitted data.
 6. Existing auth-aware UI (Navbar, messages gate) works with real session state.
 7. At least the seller/public profile flow (`/user/$username`) is backed by Supabase instead of mock `src/data/*`.
+
+---
+
+## 17) Admin UI — Layout, Sidebar & Mock Pages
+
+### 17.1 Create admin layout route
+
+- Create `src/routes/admin.tsx` as a layout route with:
+  - Left sidebar (using existing `ui/sidebar` shadcn component)
+  - Admin top bar with profile avatar + username + dropdown (reuse Navbar's dropdown style)
+  - Main content area with `<Outlet />`
+  - `AdminGuard` wrapper at layout level (remove per-page guards from child routes)
+  - This replaces the root `Navbar + Footer` for all `/admin/*` routes
+
+### 17.2 Build sidebar navigation
+
+Links:
+
+| Label | Path | Icon | Access |
+|---|---|---|---|
+| Dashboard | `/admin/dashboard` | `LayoutDashboard` | admin + moderator |
+| User Management | `/admin/users` | `Users` | admin only |
+| Seller Applications | `/admin/seller-applications` | `FileText` | admin + moderator |
+| Listings | `/admin/listings` | `Package` | admin + moderator |
+| Trades | `/admin/trades` | `ShoppingBag` | admin + moderator |
+| Moderation | `/admin/moderation` | `ShieldCheck` | admin + moderator |
+| Settings | `/admin/settings` | `Settings` | admin only |
+
+### 17.3 Build admin top bar
+
+- Mobile sidebar toggle (hamburger, uses `SidebarTrigger` from shadcn/ui)
+- Page title or breadcrumb in the center area
+- Right side: profile avatar + username button (exact same style as `Navbar.tsx`: `bg-surface ring-1 ring-zinc-800 rounded-full pl-1 pr-3 py-1`)
+- Dropdown menu: Profile, View Public Profile, separator, Log out
+- Branding: dark theme, `text-brand-red`, `bg-surface`, `border-zinc-800`
+
+### 17.4 Enhance dashboard with quick actions
+
+- Keep existing 4 stat cards with mock counts
+- Add a "Quick Actions" section below stats with shortcut buttons:
+  - "Review Pending Approvals" → `/admin/seller-applications`
+  - "Review Open Reports" → `/admin/moderation`
+  - "View All Listings" → `/admin/listings`
+- Keep the Role Reference section
+- Keep the Setup Admin SQL section
+
+### 17.5 Populate remaining admin pages with mock data
+
+**`/admin/users`** — User Management
+- shadcn/ui `Table` with columns: Avatar, Username, Email, Roles (badges), Status, Actions
+- Actions: Grant/Revoke role dropdown, Suspend/Ban button
+- Mock 8–10 user rows
+
+**`/admin/seller-applications`** — Seller Applications
+- Table with columns: Username, Full Name, Reason, Submitted Date, Status, Actions
+- Actions: Approve / Reject buttons
+- Mock 4–5 application rows (mix of pending/approved/rejected)
+
+**`/admin/listings`** — Listings Management (new page)
+- Table with columns: Title, Seller, Type, Price, RAP, Status, Actions
+- Actions: Hide / Publish toggle button
+- Mock 6–8 listing rows
+
+**`/admin/trades`** — Trades Management (new page)
+- Table with columns: ID, Buyer, Seller, Listing, Status, Created Date, Actions
+- Actions: Cancel trade, Mark dispute
+- Mock 5–6 trade rows
+
+**`/admin/moderation`** — Moderation
+- Two tabs: Flags | Disputes
+- Flags table: Reported By, Target (listing/user), Reason, Status, Actions
+- Disputes table: Initiator, Trade ID, Status, Moderator, Resolution
+- Mock 3–4 rows per tab
+
+**`/admin/settings`** — Platform Settings
+- Form fields (mock, no save logic yet):
+  - Verified Trader Min Trades (text input, default `25`)
+  - Verified Trader Min Rating (text input, default `4.6`)
+  - Seller Commission % (text input, default `5.0`)
+- Save button (shows toast, stores in-memory state)
+
+### 17.6 Files to create/modify
+
+| Action | File |
+|---|---|
+| **Create** | `src/routes/admin.tsx` (layout route with sidebar + top bar + Outlet) |
+| **Create** | `src/components/AdminSidebar.tsx` (sidebar navigation content) |
+| **Create** | `src/components/AdminTopBar.tsx` (top bar with profile dropdown) |
+| **Create** | `src/lib/admin/mockData.ts` (centralized mock data arrays) |
+| **Modify** | `src/routes/admin/dashboard.tsx` (add quick actions section) |
+| **Modify** | `src/routes/admin/users.tsx` (replace placeholder with table) |
+| **Modify** | `src/routes/admin/seller-applications.tsx` (replace placeholder with table) |
+| **Create** | `src/routes/admin/listings.tsx` (new listings management page) |
+| **Create** | `src/routes/admin/trades.tsx` (new trades management page) |
+| **Modify** | `src/routes/admin/moderation.tsx` (replace placeholder with tabs + tables) |
+| **Modify** | `src/routes/admin/settings.tsx` (replace placeholder with form) |
+| **Check** | `src/routeTree.gen.ts` (auto-generated, verify admin routes nest under admin layout) |
+
+### 17.7 Design decisions
+
+- `item_type` stays a hardcoded enum (`Hat`, `Face`, `Accessory`, `Gear`, `Bundle`) — no dynamic categories table needed yet.
+- Mock data lives in `src/lib/admin/mockData.ts` for now; will be replaced with Supabase queries in Phase 5.
+- Admin layout replaces the root `Navbar` and `Footer` entirely — no duplicate nav when in `/admin/*`.
+- Sidebar uses shadcn/ui `Sidebar` component (already exists at `src/components/ui/sidebar.tsx`).
+- Profile dropdown in admin top bar reuses the same visual style as `Navbar.tsx` for branding consistency.
+
+---
+
+## 17) Admin UI — Layout, Sidebar & Mock Pages
+
+### 17.1 Overview
+
+Replace placeholder admin pages with a dedicated admin layout (sidebar + top bar) that replaces the root Navbar/Footer for all `/admin/*` routes. Populate each page with shadcn/ui components using mock data.
+
+### 17.2 Files to create
+
+| File | Purpose |
+|---|---|
+| `src/lib/admin/mockData.ts` | Centralized mock data for all admin pages |
+| `src/components/AdminSidebar.tsx` | Left sidebar with navigation links |
+| `src/components/AdminTopBar.tsx` | Top bar with profile avatar + dropdown |
+| `src/routes/admin.tsx` | Layout route wrapping sidebar + top bar + `<Outlet />` |
+| `src/routes/admin/listings.tsx` | Listings management page (new) |
+| `src/routes/admin/trades.tsx` | Trades management page (new) |
+
+### 17.3 Files to modify
+
+| File | Change |
+|---|---|
+| `src/routes/admin/dashboard.tsx` | Add Quick Actions section below stat cards |
+| `src/routes/admin/users.tsx` | Replace placeholder with user table + role actions |
+| `src/routes/admin/seller-applications.tsx` | Replace placeholder with applications table |
+| `src/routes/admin/moderation.tsx` | Replace placeholder with Flags / Disputes tabs |
+| `src/routes/admin/settings.tsx` | Replace placeholder with config form |
+
+### 17.4 Sidebar navigation
+
+| Label | Path | Icon | Guard |
+|---|---|---|---|
+| Dashboard | `/admin/dashboard` | `LayoutDashboard` | AdminGuard |
+| User Management | `/admin/users` | `Users` | AdminOnlyGuard |
+| Seller Applications | `/admin/seller-applications` | `FileText` | AdminGuard |
+| Listings | `/admin/listings` | `Package` | AdminGuard |
+| Trades | `/admin/trades` | `ShoppingBag` | AdminGuard |
+| Moderation | `/admin/moderation` | `ShieldCheck` | AdminGuard |
+| Settings | `/admin/settings` | `Settings` | AdminOnlyGuard |
+
+### 17.5 Layout architecture
+
+```
+src/routes/admin.tsx (layout route)
+├── <AdminGuard> (at layout level)
+│   ├── <SidebarProvider>
+│   │   ├── <AdminSidebar /> (left)
+│   │   ├── <AdminTopBar /> (top right of content area)
+│   │   └── <Outlet /> (page content)
+│   └── </SidebarProvider>
+└── </AdminGuard>
+```
+
+- Remove per-page `AdminGuard` / `AdminOnlyGuard` wrappers; enforce at layout level
+- `/admin/users` and `/admin/settings` redirect non-admin users via layout-level check
+- Sidebar hides nav items the user doesn't have access to
+
+### 17.6 Mock data structure
+
+Centralized in `src/lib/admin/mockData.ts`:
+
+- `MOCK_USERS` (10 users) — id, username, email, avatar_url, roles[], account_status, created_at
+- `MOCK_SELLER_APPLICATIONS` (5 apps) — id, user_id, user_name, full_name, reason, status, created_at
+- `MOCK_LISTINGS` (8 listings) — id, seller_id, seller_name, title, item_type, price_php, rap, status, created_at
+- `MOCK_TRADES` (6 trades) — id, listing_id, listing_title, buyer_id, buyer_name, seller_id, seller_name, status, created_at
+- `MOCK_FLAGS` (4 flags) — id, listing_id, listing_title, reported_by_name, reason, status, created_at
+- `MOCK_DISPUTES` (3 disputes) — id, trade_id, initiator_name, status, created_at
+
+### 17.7 UI conventions (same as root)
+
+- shadcn/ui components (`Table`, `Button`, `Badge`, `Tabs`, `Card`, `Input`, `Select`, `Avatar`, `DropdownMenu`)
+- Lucide icons
+- Semantic Tailwind classes: `bg-surface`, `ring-1 ring-zinc-800`, `text-brand-red`, `border-zinc-800`
+- Dropdown menu in top bar matches root Navbar exactly: `bg-surface ring-1 ring-zinc-800 rounded-full pl-1 pr-3 py-1`
+- Sonner toasts for actions
+- Dark theme throughout
