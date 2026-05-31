@@ -128,8 +128,8 @@ If the bucket doesn't exist, create it via Supabase dashboard or migration. This
 - [x] Navbar avatar: show real image when `avatar_url` exists
 - [x] Navbar dropdown: "Profile" → /profile, add "View Public Profile" → /user/$username
 - [x] Verify bucket `user-avatars` exists and RLS is configured
-- [ ] Test: log in, visit /profile, see data, edit fields, upload avatar, see navbar update
-- [ ] Test: avatar fallback still works for users without avatar_url
+- [x] Test: log in, visit /profile, see data, edit fields, upload avatar, see navbar update
+- [x] Test: avatar fallback still works for users without avatar_url
 
 ---
 
